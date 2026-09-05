@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>赤月战歌 V3</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100b08;color:#f6dfae;font-family:Arial,"Microsoft YaHei",sans-serif;touch-action:none}
+button{touch-action:manipulation}
+#app{height:100dvh;display:flex;flex-direction:column}
+.top{height:48px;flex:none;padding:8px 12px;background:#25120c;border-bottom:2px solid #9a5d28;display:flex;align-items:center;justify-content:space-between;font-weight:800}
+.version{font-size:12px;opacity:.8}
+.main{flex:1;min-height:0;display:flex}
+.scene{position:relative;flex:1;overflow:hidden;background:radial-gradient(circle at 50% 40%,#70502f 0,#382519 50%,#160e0a 100%)}
+.scene:before{content:"";position:absolute;inset:0;background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:50px 50px}
+.title{position:absolute;z-index:2;top:8px;left:50%;transform:translateX(-50%);font-size:21px;color:#ffd77a;text-shadow:2px 2px #3a1208;font-weight:900;white-space:nowrap}
+.player{position:absolute;z-index:3;transform:translate(-50%,-50%);font-size:50px;filter:drop-shadow(0 5px 2px #000);transition:left .12s,top .12s}
+.mob{position:absolute;z-index:4;font-size:38px;text-align:center;cursor:pointer;user-select:none;animation:float 1.5s ease-in-out infinite}
+.mob span{display:block;font-size:11px;color:#fff;text-shadow:1px 1px #000;white-space:nowrap}
+.mob.boss{font-size:52px}
+@keyframes float{50%{transform:translateY(-4px)}}
+.log{position:absolute;z-index:5;left:8px;bottom:8px;width:min(60%,360px);max-height:100px;overflow:hidden;background:#0009;border:1px solid #81502b;border-radius:6px;padding:6px;font-size:11px;line-height:1.45}
+.panel{width:230px;flex:none;background:#1c100b;border-left:2px solid #794822;padding:8px;display:flex;flex-direction:column;gap:7px;overflow:auto}
+.stat{background:#29170f;padding:7px;border:1px solid #704222;border-radius:5px}
+.bar{height:10px;background:#351313;margin-top:4px;border-radius:4px;overflow:hidden}
+.hp{height:100%;background:#c33}.xp{height:100%;background:#d59a24}
+.skills{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.skills button,.ctrl button,.action{background:#4a2817;color:#ffe2a5;border:1px solid #a66a2f;border-radius:6px;padding:9px;font-weight:700;font-size:13px}
+.skills button:active,.ctrl button:active,.action:active{transform:scale(.97);background:#64381f}
+.ctrl{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.ctrl button:nth-child(1){grid-column:2}.ctrl button:nth-child(4){grid-column:2}
+.action{width:100%;margin-top:1px}
+.bottom{height:30px;flex:none;padding:6px;background:#160d09;border-top:2px solid #704222;font-size:11px;text-align:center}
+@media(max-width:700px){
+ .panel{width:175px}.title{font-size:17px}.player{font-size:42px}.mob{font-size:30px}.mob.boss{font-size:42px}
+ .log{width:58%;max-height:82px;font-size:10px}
+ .skills button,.ctrl button{padding:8px 4px;font-size:11px}
+}
+@media(orientation:portrait) and (max-width:500px){
+ .panel{width:155px}.top{height:44px}.title{top:5px}.bottom{height:26px;padding:5px;font-size:10px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+ <div class="top">
+  <div>⚔️ 赤月战歌 <span class="version">V3</span></div>
+  <div id="lv">Lv.1 烈刃</div>
+ </div>
+ <div class="main">
+  <div class="scene" id="scene">
+   <div class="title">苍狼荒原 · V3</div>
+   <div class="player" id="player">🧑‍⚔️</div>
+   <div class="log" id="log">欢迎来到赤月战歌 V3！<br>点击怪物战斗，方向键移动。游戏会自动保存。</div>
+  </div>
+  <aside class="panel">
+   <div class="stat">❤️ HP <b id="hpText">100/100</b><div class="bar"><div class="hp" id="hp"></div></div></div>
+   <div class="stat">⭐ EXP <b id="xpText">0/100</b><div class="bar"><div class="xp" id="xp"></div></div></div>
+   <div class="stat">💰 金币 <b id="gold">0</b></div>
+   <div class="stat">🎒 装备<br><b id="gear">荒原铁剑</b></div>
+   <div class="skills">
+    <button onclick="attack()">⚔️ 普攻</button>
+    <button onclick="skill(1)">🌪️ 旋风斩</button>
+    <button onclick="skill(2)">🔥 烈焰斩</button>
+    <button onclick="skill(3)">😡 狂暴</button>
+   </div>
+   <div class="ctrl">
+    <button onclick="move(0,-1)">⬆️</button>
+    <button onclick="move(-1,0)">⬅️</button>
+    <button onclick="move(1,0)">➡️</button>
+    <button onclick="move(0,1)">⬇️</button>
+   </div>
+   <button class="action" onclick="saveGame()">💾 保存进度</button>
+   <button class="action" onclick="resetGame()">🔄 重新开始</button>
+  </aside>
+ </div>
+ <div class="bottom">赤月战歌 V3 · 单机版 · 自动保存 · 移动端防误触缩放</div>
+</div>
+<script>
+let lv=1,hp=100,maxHp=100,xp=0,gold=0,px=50,py=52,gear="荒原铁剑",enemies=[];
+const scene=document.getElementById("scene"),logEl=document.getElementById("log");
+const saveKey="chiyue_zhange_v3";
+function log(t){logEl.innerHTML=t+"<br>"+logEl.innerHTML}
+function ui(){
+ document.getElementById("lv").textContent="Lv."+lv+" 烈刃";
+ document.getElementById("hpText").textContent=hp+"/"+maxHp;
+ document.getElementById("xpText").textContent=xp+"/100";
+ document.getElementById("gold").textContent=gold;
+ document.getElementById("gear").textContent=gear;
+ document.getElementById("hp").style.width=(hp/maxHp*100)+"%";
+ document.getElementById("xp").style.width=xp+"%";
+ document.getElementById("player").style.left=px+"%";
+ document.getElementById("player").style.top=py+"%";
+}
+function saveGame(){
+ localStorage.setItem(saveKey,JSON.stringify({lv,hp,maxHp,xp,gold,px,py,gear}));
+ log("💾 进度已保存！");
+}
+function loadGame(){
+ try{
+  const s=JSON.parse(localStorage.getItem(saveKey));
+  if(s){Object.assign(window,s);log("📖 已读取 V3 游戏进度。")}
+ }catch(e){}
+}
+function resetGame(){
+ if(confirm("确定重新开始吗？当前进度会清除。")){
+  localStorage.removeItem(saveKey);location.reload();
+ }
+}
+function spawn(name,emoji,boss=false){
+ let e=document.createElement("div");
+ e.className="mob"+(boss?" boss":"");
+ e.innerHTML=emoji+"<span>"+name+(boss?" 👑":"")+"</span>";
+ e.style.left=(12+Math.random()*74)+"%";
+ e.style.top=(14+Math.random()*65)+"%";
+ e.onclick=()=>fight(e,name,boss);
+ scene.appendChild(e); enemies.push(e);
+}
+function removeEnemy(e){e.remove();enemies=enemies.filter(x=>x!==e)}
+function levelUp(){
+ while(xp>=100){
+  xp-=100;lv++;maxHp+=25;hp=maxHp;
+  log("🎉 升级！你现在 Lv."+lv+"！");
+  if(lv===5 && !enemies.some(e=>e.dataset.boss==="1")){
+   const before=enemies.length;spawn("苍狼王","🐺",true);
+   enemies[enemies.length-1].dataset.boss="1";
+   log("⚠️ 苍狼王出现了！");
+  }
+ }
+}
+function fight(e,name,boss=false){
+ if(!e||!e.isConnected)return;
+ let dmg=boss?14+Math.floor(Math.random()*10):8+Math.floor(Math.random()*8);
+ hp=Math.max(1,hp-dmg);
+ log("⚔️ 攻击 "+name+"，受到 "+dmg+" 点伤害。");
+ let dead=Math.random()>.28;
+ if(dead){
+  let gain=boss?70:18; xp+=gain; gold+=boss?200:20+Math.floor(Math.random()*30);
+  removeEnemy(e); log("🏆 击败 "+name+"！ +"+gain+" EXP");
+  if(Math.random()>.55){
+   gear=["荒原铁剑","狼皮护腕","旅者项链","精良战靴","赤月战刃"][Math.floor(Math.random()*5)];
+   log("🎁 掉落装备："+gear);
+  }
+  levelUp();
+ }
+ ui();saveGame();
+}
+function attack(){
+ let e=enemies.find(x=>x.isConnected);
+ if(e)fight(e,e.textContent.replace(" 👑",""),e.dataset.boss==="1");
+ else log("附近没有怪物。");
+}
+function skill(n){
+ if(n===3){hp=Math.min(maxHp,hp+30);log("😡 狂暴：恢复 30 HP！");}
+ else{
+  let bonus=n===2?25:15;xp+=bonus;gold+=5;
+  log((n===2?"🔥 烈焰斩":"🌪️ 旋风斩")+" 命中！ +"+bonus+" EXP");
+  levelUp();
+ }
+ ui();saveGame();
+}
+function move(dx,dy){
+ px=Math.max(5,Math.min(95,px+dx*4));
+ py=Math.max(8,Math.min(88,py+dy*4));
+ ui();saveGame();
+}
+document.addEventListener("gesturestart",e=>e.preventDefault(),{passive:false});
+document.addEventListener("gesturechange",e=>e.preventDefault(),{passive:false});
+document.addEventListener("gestureend",e=>e.preventDefault(),{passive:false});
+let lastTouch=0;
+document.addEventListener("touchend",e=>{
+ const now=Date.now(); if(now-lastTouch<300)e.preventDefault(); lastTouch=now;
+},{passive:false});
+loadGame();
+if(!enemies.length)for(let i=0;i<6;i++)spawn(["苍狼","荒原鬼卒","血蝠"][i%3],["🐺","👹","🦇"][i%3]);
+ui();
+setInterval(saveGame,15000);
+</script>
+</body>
+</html>
